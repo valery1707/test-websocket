@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket test</title>
+
+    <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.3/sockjs.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+
+    <script type="text/javascript">
+        //https://stackoverflow.com/a/8809472/1263442
+        function guid() {
+            var d = new Date().getTime();
+            if (window.performance && typeof window.performance.now === "function") {
+                d += performance.now(); //use high-precision timer if available
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        var stomp = null;
+        var ws = null;
+
+        function setConnected(connected) {
+            $('#connect').prop('disabled', connected);
+            $('#disconnect').prop('disabled', !connected);
+            if (connected) {
+                $('#authorizationDiv').show();
+                $('#messageDiv').show();
+            } else {
+                $('#authorizationDiv').hide();
+                $('#messageDiv').hide();
+                $('#response').val('');
+            }
+        }
+
+        function connect() {
+            const mode = $('input[name="mode"]:checked').val();
+            if (mode == "pure") {
+                ws = new WebSocket("ws://localhost:8080/pure");
+                ws.onopen = function () {
+                    setConnected(true);
+                    debug("Connected to service!");
+                };
+                ws.onmessage = function (evt) {
+                    processMessage(JSON.parse(evt.data));
+                };
+                ws.onclose = function () {
+                    debug("Disconnected from service!");
+                    setConnected(false);
+                };
+                ws.onerror = function (err) {
+                    error(err);
+                };
+            } else if (mode == "stomp") {
+                var socket = new SockJS('/stomp');
+                stomp = Stomp.over(socket);
+                stomp.connect({}, function (frame) {
+                    setConnected(true);
+                    debug('Connected: ' + frame);
+                    stomp.subscribe('/topic/greetings', function (greeting) {
+                        processMessage(JSON.parse(greeting.body).content);
+                    });
+                });
+            }
+        }
+
+        function disconnect() {
+            if (stomp != null) {
+                stomp.disconnect();
+            }
+            if (ws != null) {
+                ws.close();
+            }
+            setConnected(false);
+            debug("Disconnected");
+        }
+
+        function _send(message) {
+            if (stomp != null) {
+                stomp.send("/app/stomp", {}, JSON.stringify(message));
+            }
+            if (ws != null) {
+                ws.send(JSON.stringify(message));
+            }
+        }
+
+        function auth() {
+            const message = {
+                'type': 'LOGIN_CUSTOMER',
+                'sequence_id': guid(),
+                'data': {
+                    'email': $('#email').val(),
+                    'password': $('#password').val()
+                }
+            };
+            _send(message);
+        }
+
+        function sendMessage() {
+            const message = {
+                'type': 'ECHO',
+                'sequence_id': guid(),
+                'data': {
+                    'api_token': $('#token').val(),
+                    'message': $('#message').val()
+                }
+            };
+            _send(message);
+        }
+
+        function processMessage(message) {
+            if (message.type == "CUSTOMER_API_TOKEN") {
+                $('#messageDiv').show();
+                $('#token').val(message.data.api_token);
+            }
+            $('#response').val(JSON.stringify(message, null, '  '));
+        }
+
+        function debug(logText) {
+            console.log(logText);
+        }
+
+        function error(msg) {
+            console.error(msg);
+        }
+    </script>
+</head>
+<body onload="disconnect()">
+<noscript>
+    <h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
+        Javascript and reload this page!</h2>
+</noscript>
+<div>
+    <div>
+        <label>Connection mode:</label><br/>
+        <label>
+            <input type="radio" name="mode" value="pure" checked="checked"/>
+            Pure WebSocket<br/>
+        </label>
+        <label>
+            <input type="radio" name="mode" value="stomp"/>
+            Sock.JS + STOMP
+        </label><br/>
+    </div>
+    <div>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+    </div>
+    <div id="authorizationDiv">
+        <label for="email">Email</label><input type="email" id="email"/><br/>
+        <label for="password">Password</label><input type="password" id="password"/><br/>
+        <button id="auth" onclick="auth();">Auth</button>
+    </div>
+    <div id="messageDiv">
+        <label for="token">Token:</label>
+        <input type="text" id="token" title="Token"/>
+        <br/>
+
+        <label for="message">Message:</label>
+        <input type="text" id="message" title="message"/>
+        <br/>
+
+        <button id="sendMessage" onclick="sendMessage()">Send</button>
+        <br/>
+
+        <label for="response">Response:</label><br/>
+        <textarea id="response" title="Response" disabled="disabled" rows="10" cols="50">
+        </textarea>
+    </div>
+</div>
+</body>
+</html>
