@@ -19,7 +19,7 @@ public class WebProtocol {
 	private String type;
 	@JsonProperty("sequence_id")
 	private String sequenceId;
-	private Map<String, String> data;
+	private Map<String, String> data = new HashMap<>();
 
 	public String getType() {
 		return type;
