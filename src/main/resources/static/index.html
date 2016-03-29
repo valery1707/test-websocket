@@ -90,8 +90,8 @@
                 stomp.connect({}, function (frame) {
                     setConnected(true);
                     debug('Connected: ' + frame);
-                    stomp.subscribe('/topic/greetings', function (greeting) {
-                        processMessage(JSON.parse(greeting.body).content);
+                    stomp.subscribe('/topic/stomp', function (response) {
+                        processMessage(JSON.parse(response.body));
                     });
                 });
             }
