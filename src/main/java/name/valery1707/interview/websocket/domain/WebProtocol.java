@@ -79,9 +79,10 @@ public class WebProtocol {
 		WebProtocol dst = new WebProtocol();
 		dst.setType(UNKNOWN_TYPE);
 		dst.setSequenceId(src.getSequenceId());
-		dst.setData(new HashMap<>(2));
+		dst.setData(new HashMap<>(3));
 		dst.getData().put("error_code", "messageType.unknown");
 		dst.getData().put("error_description", "Unknown message type: " + src.getType());
+		dst.getData().put("type", src.getType());
 		return dst;
 	}
 

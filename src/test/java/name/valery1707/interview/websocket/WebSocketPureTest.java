@@ -205,9 +205,9 @@ public class WebSocketPureTest {
 	@Test(timeout = 10_000 * 2)
 	public void testEcho_validToken() throws Exception {
 		WebProtocol auth = auth_correct();
-
 		String token = auth.getData().get("api_token");
 		String message = "message";
+
 		WebProtocol request = makeEcho(token, message);
 		WebProtocol response = send(request);
 		assertThat(response)
@@ -285,4 +285,30 @@ public class WebSocketPureTest {
 				.containsEntry("api_token", token2)
 				.containsEntry("message", message2);
 	}
+
+	@Test(timeout = 10_000 * 2)
+	public void testUnknownMessageType() throws Exception {
+		WebProtocol auth = auth_correct();
+		String token = auth.getData().get("api_token");
+
+		WebProtocol request = new WebProtocol();
+		request.setType("UNKNOWN");
+		request.setSequenceId(UUID.randomUUID().toString());
+		request.getData().put("api_token", token);
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.UNKNOWN_TYPE);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("type", "error_code", "error_description")
+				.containsEntry("type", request.getType())
+				.containsEntry("error_code", "messageType.unknown")
+				.containsEntry("error_description", "Unknown message type: " + request.getType());
+	}
+
 }
