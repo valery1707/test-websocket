@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/valery1707/test-websocket.svg?branch=master)](https://travis-ci.org/valery1707/test-websocket)
+[![Coverage Status](https://coveralls.io/repos/github/valery1707/test-websocket/badge.svg?branch=master)](https://coveralls.io/github/valery1707/test-websocket?branch=master)
 
 Simple project for work with Websocket: `spring-boot`, `jetty-embedded`
 
@@ -15,3 +16,4 @@ Simple project for work with Websocket: `spring-boot`, `jetty-embedded`
 ### Useful gradle commands
 1. Run project from console: `./gradlew bootRun`
 1. Build executable jar: `./gradlew build`
+1. Build test coverage report: `./gradlew check jacocoTestReport` and open `build/reports/jacoco/test/html/index.html`

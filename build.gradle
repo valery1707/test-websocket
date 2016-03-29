@@ -104,6 +104,23 @@ configurations {
 	all*.exclude group: 'commons-logging'
 }
 
+apply plugin: 'jacoco'
+apply plugin: 'com.github.kt3k.coveralls'
+jacoco {
+	toolVersion = "0.7.6.201602180812"
+}
+buildscript {
+	dependencies {
+		classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.4.0'
+	}
+}
+jacocoTestReport {
+	reports {
+		xml.enabled = true // coveralls plugin depends on xml format report
+		html.enabled = true
+	}
+}
+
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.11'
 }
