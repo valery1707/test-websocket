@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/valery1707/test-websocket.svg?branch=master)](https://travis-ci.org/valery1707/test-websocket)
+
 Simple project for work with Websocket: `spring-boot`, `jetty-embedded`
 
 ### Explanation of technology choice:
