@@ -205,6 +205,25 @@ public class WebSocketPureTest {
 	}
 
 	@Test(timeout = 10_000)
+	public void testEcho_nullToken() throws Exception {
+		WebProtocol request = makeEcho(null, "message");
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.INVALID_TOKEN);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "error_code", "error_description")
+				.containsEntry("api_token", null)
+				.containsEntry("error_code", "token.invalid")
+				.containsEntry("error_description", "Token invalid");
+	}
+
+	@Test(timeout = 10_000)
 	public void testEcho_nonActualToken() throws Exception {
 		String token = "00000000-0000-0000-0000-000000000000";
 		WebProtocol request = makeEcho(token, "message");
