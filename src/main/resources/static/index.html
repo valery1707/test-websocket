@@ -36,6 +36,15 @@
                 return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
         }
+
+        //https://stackoverflow.com/a/20161536/1263442
+        function url(s, fromRoot) {
+            const l = window.location;
+            const proto = l.protocol === "https:" ? "wss://" : "ws://";
+            const port = ((l.port != 80) && (l.port != 443)) ? ":" + l.port : "";
+            const path = fromRoot ? '/': l.pathname;
+            return proto + l.hostname + port + path + s;
+        }
     </script>
 
     <script type="text/javascript">
@@ -60,7 +69,7 @@
         function connect() {
             const mode = $('input[name="mode"]:checked').val();
             if (mode == "pure") {
-                ws = new WebSocket("ws://localhost:8080/pure");
+                ws = new WebSocket(url("/pure", true));
                 ws.onopen = function () {
                     setConnected(true);
                     debug("Connected to service!");
