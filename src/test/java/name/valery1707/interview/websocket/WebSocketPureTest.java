@@ -89,6 +89,28 @@ public class WebSocketPureTest {
 	}
 
 	@Test(timeout = 10_000)
+	public void testIncorrectFormat_token() throws Exception {
+		WebProtocol request = new WebProtocol();
+		request.setType("UNKNOWN");
+		request.setSequenceId(UUID.randomUUID().toString());
+		request.getData().put("api_token", "token");
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.INVALID_TOKEN);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "error_code", "error_description")
+				.containsEntry("api_token", "token")
+				.containsEntry("error_code", "token.invalid")
+				.containsEntry("error_description", "Token invalid");
+	}
+
+	@Test(timeout = 10_000)
 	public void testAuth_empty() throws Exception {
 		WebProtocol response = send(toJSON("{'type':'" + WebProtocol.AUTH + "'}"));
 		assertThat(response)
