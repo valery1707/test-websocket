@@ -97,6 +97,21 @@ public class WebSocketPureTest {
 	}
 
 	@Test(timeout = 10_000)
+	public void testIncorrectFormat() throws Exception {
+		WebProtocol response = send(toJSON("{'data':'" + WebProtocol.AUTH + "'}"));
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.SERVER_ERROR);
+		assertThat(response.getSequenceId())
+				.isNullOrEmpty();
+		assertThat(response.getData())
+				.containsOnlyKeys("error_code", "error_description")
+				.containsEntry("error_code", "server.internalError");
+	}
+
+	@Test(timeout = 10_000)
 	public void testAuth_empty() throws Exception {
 		WebProtocol response = send(toJSON("{'type':'" + WebProtocol.AUTH + "'}"));
 		assertThat(response)

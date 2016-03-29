@@ -43,9 +43,7 @@ public class PureController extends TextWebSocketHandler {
 			result = processor.process(payload);
 		}
 
-		if (result != null) {
-			session.sendMessage(new TextMessage(toJSON(result)));
-		}
+		session.sendMessage(new TextMessage(toJSON(result)));
 	}
 
 	private String toJSON(WebProtocol message) {
