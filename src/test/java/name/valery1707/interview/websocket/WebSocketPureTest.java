@@ -1,17 +1,13 @@
 package name.valery1707.interview.websocket;
 
 import name.valery1707.interview.websocket.domain.WebProtocol;
+import name.valery1707.interview.websocket.util.JsonConverter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.http.MediaType;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.socket.TextMessage;
@@ -24,7 +20,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -38,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WebSocketPureTest {
 
 	@Inject
-	private MessageConverter converter;
+	private JsonConverter converter;
 
 	@Value("${local.server.port}")
 	int port;
@@ -58,8 +53,7 @@ public class WebSocketPureTest {
 
 			@Override
 			protected void handleTextMessage(WebSocketSession session, TextMessage wire) throws Exception {
-				WebProtocol payload = (WebProtocol) converter.fromMessage(new GenericMessage<>(wire.getPayload()), WebProtocol.class);
-				messages.put(payload);
+				messages.put(converter.fromJSON(wire.getPayload(), WebProtocol.class));
 			}
 		}, "ws://localhost:{port}/pure", port);
 		connectionManager.start();
@@ -72,24 +66,7 @@ public class WebSocketPureTest {
 	}
 
 	private WebProtocol send(WebProtocol request) throws IOException, InterruptedException {
-		return send(toJSON(request));
-	}
-
-	//todo Create common bean
-	private String toJSON(WebProtocol message) {
-		Map<String, Object> headers = new HashMap<>(1);
-		headers.put(MessageHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8);
-		Message<?> wire = converter.toMessage(message, new MessageHeaders(headers));
-		Object payload = wire.getPayload();
-		String json;
-		if (payload instanceof byte[]) {
-			json = new String((byte[]) payload);
-		} else if (payload instanceof String) {
-			json = (String) payload;
-		} else {
-			json = payload.toString();
-		}
-		return json;
+		return send(converter.toJSON(request));
 	}
 
 	private String toJSON(String src) {
