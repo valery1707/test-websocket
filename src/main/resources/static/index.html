@@ -2,9 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Websocket test</title>
 
     <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+          crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.3/sockjs.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
@@ -34,9 +48,11 @@
             if (connected) {
                 $('#authorizationDiv').show();
                 $('#messageDiv').show();
+                $('#logDiv').show();
             } else {
                 $('#authorizationDiv').hide();
                 $('#messageDiv').hide();
+                $('#logDiv').hide();
                 $('#response').val('');
             }
         }
@@ -84,6 +100,7 @@
         }
 
         function _send(message) {
+            $('#request').val(JSON.stringify(message, null, '  '));
             if (stomp != null) {
                 stomp.send("/app/stomp", {}, JSON.stringify(message));
             }
@@ -119,7 +136,7 @@
         function processMessage(message) {
             if (message.type == "CUSTOMER_API_TOKEN") {
                 $('#messageDiv').show();
-                $('#token').val(message.data.api_token);
+                $('#token').val(message.data.api_token).change();
             }
             $('#response').val(JSON.stringify(message, null, '  '));
         }
@@ -138,43 +155,97 @@
     <h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
         Javascript and reload this page!</h2>
 </noscript>
-<div>
-    <div>
-        <label>Connection mode:</label><br/>
-        <label>
-            <input type="radio" name="mode" value="pure" checked="checked"/>
-            Pure WebSocket<br/>
-        </label>
-        <label>
-            <input type="radio" name="mode" value="stomp"/>
-            Sock.JS + STOMP
-        </label><br/>
-    </div>
-    <div>
-        <button id="connect" onclick="connect();">Connect</button>
-        <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
-    </div>
-    <div id="authorizationDiv">
-        <label for="email">Email</label><input type="email" id="email"/><br/>
-        <label for="password">Password</label><input type="password" id="password"/><br/>
-        <button id="auth" onclick="auth();">Auth</button>
-    </div>
-    <div id="messageDiv">
-        <label for="token">Token:</label>
-        <input type="text" id="token" title="Token"/>
-        <br/>
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Connection mode
+            </div>
+            <div class="panel-body">
+                <label>
+                    <input type="radio" name="mode" value="pure" checked="checked"/>
+                    Pure WebSocket<br/>
+                </label>
+                <label>
+                    <input type="radio" name="mode" value="stomp"/>
+                    Sock.JS + STOMP
+                </label><br/>
+                <div>
+                    <button id="connect" class="btn btn-primary" onclick="connect();">Connect</button>
+                    <button id="disconnect" class="btn btn-default" disabled="disabled" onclick="disconnect();">Disconnect</button>
+                </div>
+            </div>
+        </div>
 
-        <label for="message">Message:</label>
-        <input type="text" id="message" title="message"/>
-        <br/>
-
-        <button id="sendMessage" onclick="sendMessage()">Send</button>
-        <br/>
-
-        <label for="response">Response:</label><br/>
-        <textarea id="response" title="Response" disabled="disabled" rows="10" cols="50">
-        </textarea>
+        <div class="panel panel-default" id="authorizationDiv">
+            <div class="panel-heading">
+                Authorization
+            </div>
+            <div class="panel-body">
+                <form>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Email"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Password"/>
+                    </div>
+                </form>
+                <button id="auth" class="btn btn-primary" onclick="auth();">Auth</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3" id="messageDiv">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Test
+            </div>
+            <div class="panel-body">
+                <form>
+                    <div class="form-group">
+                        <label for="token">Token</label>
+                        <input type="text" class="form-control" id="token" title="Token"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <input type="text" class="form-control" id="message" title="message"/>
+                    </div>
+                </form>
+                <button id="sendMessage" class="btn btn-default" onclick="sendMessage();">Send</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4" id="logDiv">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Message log
+            </div>
+            <div class="panel-body">
+                <form>
+                    <div class="form-group">
+                        <label for="request">Request</label><br/>
+                        <textarea class="form-control" id="request" title="Request" disabled="disabled" rows="10" cols="80"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="response">Response</label><br/>
+                        <textarea class="form-control" id="response" title="Response" disabled="disabled" rows="10" cols="80"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+<script>
+    $("#token").change(function (event) {
+        const token = $(event.currentTarget).val();
+        const button = $('#sendMessage');
+        if (token) {
+            button.removeClass('btn-default').addClass('btn-primary');
+        } else {
+            button.removeClass('btn-primary').addClass('btn-default');
+        }
+    });
+</script>
 </body>
 </html>
