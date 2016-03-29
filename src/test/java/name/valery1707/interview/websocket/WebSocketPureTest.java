@@ -134,6 +134,10 @@ public class WebSocketPureTest {
 
 	@Test(timeout = 10_000)
 	public void testAuth_correct() throws Exception {
+		auth_correct();
+	}
+
+	private WebProtocol auth_correct() throws Exception {
 		WebProtocol request = makeAuth("fpi@bk.ru", "123123");
 		WebProtocol response = send(request);
 		assertThat(response)
@@ -146,5 +150,139 @@ public class WebSocketPureTest {
 				.isEqualTo(request.getSequenceId());
 		assertThat(response.getData())
 				.containsOnlyKeys("api_token", "api_token_expiration_date");
+		return response;
+	}
+
+	private WebProtocol makeEcho(String token, String message) {
+		WebProtocol request = new WebProtocol();
+		request.setType(WebProtocol.ECHO);
+		request.setSequenceId(UUID.randomUUID().toString());
+		request.getData().put("api_token", token);
+		request.getData().put("message", message);
+		return request;
+	}
+
+	@Test(timeout = 10_000)
+	public void testEcho_unknownToken() throws Exception {
+		String token = UUID.randomUUID().toString();
+		WebProtocol request = makeEcho(token, "message");
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.INVALID_TOKEN);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "error_code", "error_description")
+				.containsEntry("api_token", token)
+				.containsEntry("error_code", "token.invalid")
+				.containsEntry("error_description", "Token invalid");
+	}
+
+	@Test(timeout = 10_000)
+	public void testEcho_nonActualToken() throws Exception {
+		String token = "00000000-0000-0000-0000-000000000000";
+		WebProtocol request = makeEcho(token, "message");
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.INVALID_TOKEN);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "error_code", "error_description")
+				.containsEntry("api_token", token)
+				.containsEntry("error_code", "token.invalid")
+				.containsEntry("error_description", "Token invalid");
+	}
+
+	@Test(timeout = 10_000 * 2)
+	public void testEcho_validToken() throws Exception {
+		WebProtocol auth = auth_correct();
+
+		String token = auth.getData().get("api_token");
+		String message = "message";
+		WebProtocol request = makeEcho(token, message);
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.ECHO);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "message")
+				.containsEntry("api_token", token)
+				.containsEntry("message", message);
+	}
+
+	@Test(timeout = 10_000 * 5)
+	public void testEcho_renewToken() throws Exception {
+		//Auth
+		WebProtocol auth = auth_correct();
+		String token1 = auth.getData().get("api_token");
+		String message1 = "message1";
+
+		//Send message with actual token
+		WebProtocol request = makeEcho(token1, message1);
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.ECHO);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "message")
+				.containsEntry("api_token", token1)
+				.containsEntry("message", message1);
+
+		//Auth again - old tokens will be revoked
+		auth = auth_correct();
+		String token2 = auth.getData().get("api_token");
+		String message2 = "message2";
+
+		//Send message with old token
+		request = makeEcho(token1, message1);
+		response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.INVALID_TOKEN);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "error_code", "error_description")
+				.containsEntry("api_token", token1)
+				.containsEntry("error_code", "token.invalid")
+				.containsEntry("error_description", "Token invalid");
+
+		//Send message with actual token
+		request = makeEcho(token2, message2);
+		response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.ECHO);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("api_token", "message")
+				.containsEntry("api_token", token2)
+				.containsEntry("message", message2);
 	}
 }

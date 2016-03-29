@@ -15,6 +15,6 @@ public interface TokenRepo extends JpaRepository<Token, Long>, JpaSpecificationE
 	@Query("UPDATE Token t SET t.expiration = NOW() WHERE t.account = :account AND t.expiration > NOW()")
 	int revokeActualTokens(@Param("account") Account account);
 
-	@Query("SELECT COUNT(t) FROM Token t WHERE t.token = :token AND t.expiration <= NOW()")
+	@Query("SELECT COUNT(t) FROM Token t WHERE t.token = :token AND t.expiration >= NOW()")
 	long countActualTokenByToken(@Param("token") UUID token);
 }
