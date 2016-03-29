@@ -46,6 +46,17 @@ dependencies {
 	compile 'org.springframework:spring-websocket:4.2.5.RELEASE'
 	compile 'org.springframework:spring-messaging:4.2.5.RELEASE'
 
+	//Database integration
+	compile "org.springframework:spring-jdbc:4.2.5.RELEASE"
+	compile "org.springframework:spring-tx:4.2.5.RELEASE"
+	compile "org.springframework:spring-orm:4.2.5.RELEASE"
+	compile "org.springframework.data:spring-data-jpa:1.9.4.RELEASE"
+	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+	compile 'org.hibernate:hibernate-core:5.1.0.Final'
+	compile 'org.hibernate:hibernate-entitymanager:5.1.0.Final'
+	compile 'org.hibernate:hibernate-java8:5.1.0.Final'
+	compile 'javax.transaction:javax.transaction-api:1.2'
+
 	//JSON parse library
 	compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
 	compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
@@ -56,6 +67,22 @@ dependencies {
 	compile 'javax.servlet:javax.servlet-api:3.1.0'
 	runtime 'org.eclipse.jetty:jetty-webapp:9.3.8.v20160314'
 	runtime 'org.eclipse.jetty.websocket:websocket-server:9.3.8.v20160314'
+
+	//JDBC driver (and implicit in-memory database server)
+	runtime 'com.h2database:h2:1.4.191'
+	//JDBC Connection pooling
+	runtime 'org.apache.tomcat:tomcat-jdbc:8.0.33'
+
+	//Database migration tool
+	compile 'org.flywaydb:flyway-core:4.0'
+
+	//Validation
+	compile 'javax.validation:validation-api:1.1.0.Final'
+	compile 'org.hibernate:hibernate-validator:5.2.4.Final'
+	compile 'javax.el:javax.el-api:3.0.0'
+
+	//Runtime weaver
+	compile 'org.aspectj:aspectjweaver:1.8.9'
 
 	//Useful annotations
 	compile 'com.google.code.findbugs:jsr305:3.0.1'
