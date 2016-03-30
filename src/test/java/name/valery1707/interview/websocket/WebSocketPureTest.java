@@ -19,7 +19,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.HashMap;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -90,9 +92,7 @@ public class WebSocketPureTest {
 
 	@Test(timeout = 3_000)
 	public void testIncorrectFormat_token() throws Exception {
-		WebProtocol request = new WebProtocol();
-		request.setType("UNKNOWN");
-		request.setSequenceId(UUID.randomUUID().toString());
+		WebProtocol request = new WebProtocol("UNKNOWN", UUID.randomUUID().toString());
 		request.getData().put("api_token", "token");
 		WebProtocol response = send(request);
 		assertThat(response)
@@ -127,10 +127,7 @@ public class WebSocketPureTest {
 	}
 
 	private WebProtocol makeAuth(String email, String password) {
-		WebProtocol request = new WebProtocol();
-		request.setType(WebProtocol.AUTH);
-		request.setSequenceId(UUID.randomUUID().toString());
-		request.setData(new HashMap<>(2));
+		WebProtocol request = new WebProtocol(WebProtocol.AUTH, UUID.randomUUID().toString());
 		request.getData().put("email", email);
 		request.getData().put("password", password);
 		return request;
@@ -176,9 +173,7 @@ public class WebSocketPureTest {
 	}
 
 	private WebProtocol makeEcho(String token, String message) {
-		WebProtocol request = new WebProtocol();
-		request.setType(WebProtocol.ECHO);
-		request.setSequenceId(UUID.randomUUID().toString());
+		WebProtocol request = new WebProtocol(WebProtocol.ECHO, UUID.randomUUID().toString());
 		request.getData().put("api_token", token);
 		request.getData().put("message", message);
 		return request;
@@ -332,9 +327,7 @@ public class WebSocketPureTest {
 		WebProtocol auth = auth_correct();
 		String token = auth.getData().get("api_token");
 
-		WebProtocol request = new WebProtocol();
-		request.setType("UNKNOWN");
-		request.setSequenceId(UUID.randomUUID().toString());
+		WebProtocol request = new WebProtocol("UNKNOWN", UUID.randomUUID().toString());
 		request.getData().put("api_token", token);
 		WebProtocol response = send(request);
 		assertThat(response)
@@ -352,4 +345,28 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Unknown message type: " + request.getType());
 	}
 
+	@Test(timeout = 3_000 * 2)
+	public void testCurrentTime() throws Exception {
+		WebProtocol auth = auth_correct();
+		String token = auth.getData().get("api_token");
+
+		WebProtocol request = new WebProtocol(WebProtocol.CURRENT_TIME, UUID.randomUUID().toString());
+		request.getData().put("api_token", token);
+		WebProtocol response = send(request);
+		assertThat(response)
+				.isNotNull();
+		assertThat(response.getType())
+				.isNotEmpty()
+				.isEqualTo(WebProtocol.CURRENT_TIME);
+		assertThat(response.getSequenceId())
+				.isNotNull()
+				.isEqualTo(request.getSequenceId());
+		assertThat(response.getData())
+				.containsOnlyKeys("current_time");
+		ZonedDateTime serverTime = ZonedDateTime.parse(response.getData().get("current_time"), DateTimeFormatter.ISO_DATE_TIME);
+		ZonedDateTime localTime = ZonedDateTime.now();
+		Duration duration = Duration.between(serverTime, localTime);
+		assertThat(duration.getSeconds())
+				.isLessThanOrEqualTo(2);
+	}
 }
