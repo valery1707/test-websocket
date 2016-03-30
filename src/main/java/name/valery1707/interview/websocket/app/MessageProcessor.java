@@ -13,11 +13,6 @@ public class MessageProcessor {
 	private AuthorizationService authorizationService;
 
 	public WebProtocol process(WebProtocol src) {
-		try {
-			Thread.sleep(300); // simulated delay
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		if (WebProtocol.AUTH.equals(src.getType())) {
 			try {
 				Token token = authorizationService.auth(new Account(src.getData()));
