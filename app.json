@@ -1,0 +1,6 @@
+{
+  "name": "Test WebSocket APP",
+  "description": "WebSocket app deployed to Heroku.",
+  "image": "heroku/gradle",
+  "addons": [ ]
+}

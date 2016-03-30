@@ -105,6 +105,7 @@ configurations {
 	all*.exclude group: 'commons-logging'
 }
 
+//JaCoCo
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 jacoco {
@@ -120,6 +121,11 @@ jacocoTestReport {
 		xml.enabled = true // coveralls plugin depends on xml format report
 		html.enabled = true
 	}
+}
+
+// Heroku special task
+task stage {
+	dependsOn build
 }
 
 task wrapper(type: Wrapper) {
