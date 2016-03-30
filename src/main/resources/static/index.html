@@ -75,7 +75,7 @@
         function connect() {
             const mode = $('input[name="mode"]:checked').val();
             if (mode == "pure") {
-                ws = new WebSocket(url("/pure", true));
+                ws = new WebSocket(url("pure", true));
                 ws.onopen = function () {
                     setConnected(true);
                     debug("Connected to service!");
