@@ -75,7 +75,7 @@ public class WebSocketPureTest {
 		return src.replace('\'', '"');
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testIncorrectFormat() throws Exception {
 		WebProtocol response = send(toJSON("{'data':'" + WebProtocol.AUTH + "'}"));
 		assertThat(response)
@@ -90,7 +90,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_code", "server.internalError");
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testIncorrectFormat_token() throws Exception {
 		WebProtocol request = new WebProtocol("UNKNOWN", UUID.randomUUID().toString());
 		request.getData().put("api_token", "token");
@@ -110,7 +110,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Token invalid");
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testAuth_empty() throws Exception {
 		WebProtocol response = send(toJSON("{'type':'" + WebProtocol.AUTH + "'}"));
 		assertThat(response)
@@ -133,7 +133,7 @@ public class WebSocketPureTest {
 		return request;
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testAuth_unknown() throws Exception {
 		WebProtocol request = makeAuth("unknown", "bad");
 		WebProtocol response = send(request);
@@ -151,7 +151,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Customer not found");
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testAuth_correct() throws Exception {
 		auth_correct();
 	}
@@ -179,7 +179,7 @@ public class WebSocketPureTest {
 		return request;
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testEcho_unknownToken() throws Exception {
 		String token = UUID.randomUUID().toString();
 		WebProtocol request = makeEcho(token, "message");
@@ -199,7 +199,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Token invalid");
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testEcho_nullToken() throws Exception {
 		WebProtocol request = makeEcho(null, "message");
 		WebProtocol response = send(request);
@@ -218,7 +218,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Token invalid");
 	}
 
-	@Test(timeout = 3_000)
+	@Test(timeout = 5_000)
 	public void testEcho_nonActualToken() throws Exception {
 		String token = "00000000-0000-0000-0000-000000000000";
 		WebProtocol request = makeEcho(token, "message");
@@ -238,7 +238,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Token invalid");
 	}
 
-	@Test(timeout = 3_000 * 2)
+	@Test(timeout = 5_000 * 2)
 	public void testEcho_validToken() throws Exception {
 		WebProtocol auth = auth_correct();
 		String token = auth.getData().get("api_token");
@@ -260,7 +260,7 @@ public class WebSocketPureTest {
 				.containsEntry("message", message);
 	}
 
-	@Test(timeout = 3_000 * 5)
+	@Test(timeout = 5_000 * 5)
 	public void testEcho_renewToken() throws Exception {
 		//Auth
 		WebProtocol auth = auth_correct();
@@ -322,7 +322,7 @@ public class WebSocketPureTest {
 				.containsEntry("message", message2);
 	}
 
-	@Test(timeout = 3_000 * 2)
+	@Test(timeout = 5_000 * 2)
 	public void testUnknownMessageType() throws Exception {
 		WebProtocol auth = auth_correct();
 		String token = auth.getData().get("api_token");
@@ -345,7 +345,7 @@ public class WebSocketPureTest {
 				.containsEntry("error_description", "Unknown message type: " + request.getType());
 	}
 
-	@Test(timeout = 3_000 * 2)
+	@Test(timeout = 5_000 * 2)
 	public void testCurrentTime() throws Exception {
 		WebProtocol auth = auth_correct();
 		String token = auth.getData().get("api_token");
