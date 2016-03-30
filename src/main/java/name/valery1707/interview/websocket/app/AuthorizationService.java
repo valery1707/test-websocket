@@ -2,6 +2,7 @@ package name.valery1707.interview.websocket.app;
 
 import name.valery1707.interview.websocket.app.db.AccountRepo;
 import name.valery1707.interview.websocket.app.db.TokenRepo;
+import name.valery1707.interview.websocket.crypt.PasswordService;
 import name.valery1707.interview.websocket.domain.Account;
 import name.valery1707.interview.websocket.domain.Token;
 import org.slf4j.Logger;
@@ -31,6 +32,9 @@ public class AuthorizationService {
 	@Inject
 	private TokenRepo tokenRepo;
 
+	@Inject
+	private PasswordService passwordService;
+
 	@PostConstruct
 	public void init() {//todo Private
 		tokenLivePeriod = Duration.parse(tokenLivePeriodRaw);
@@ -39,8 +43,8 @@ public class AuthorizationService {
 	@Nonnull
 	@Transactional
 	public Token auth(@Nonnull Account src) {
-		Account account = accountRepo.getByEmailAndPassword(src.getEmail(), src.getPassword());
-		if (account != null) {
+		Account account = accountRepo.getByEmail(src.getEmail());
+		if (account != null && passwordService.verifyPassword(src.getPassword(), account.getPassword())) {
 			return createNewToken(account);
 		} else {
 			throw new IllegalStateException("Unknown account");
