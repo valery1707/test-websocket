@@ -17,6 +17,10 @@ version = '0.1.0-SNAPSHOT'
 jar {
 	baseName = 'test-websocket'
 }
+apply plugin: 'war'
+war {
+	baseName = 'test-websocket'
+}
 
 buildscript {
 	dependencies {
@@ -27,6 +31,9 @@ apply plugin: 'spring-boot'
 //http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-customize-dependency-versions
 ext['jetty.version'] = '9.3.8.v20160314'
 
+configurations {
+	providedRuntime
+}
 dependencies {
 	//Logging
 	compile 'org.slf4j:slf4j-api:1.7.19'
@@ -65,8 +72,8 @@ dependencies {
 
 	//Servlet container
 	compile 'javax.servlet:javax.servlet-api:3.1.0'
-	runtime 'org.eclipse.jetty:jetty-webapp:9.3.8.v20160314'
-	runtime 'org.eclipse.jetty.websocket:websocket-server:9.3.8.v20160314'
+	providedRuntime 'org.eclipse.jetty:jetty-webapp:9.3.8.v20160314'
+	providedRuntime 'org.eclipse.jetty.websocket:websocket-server:9.3.8.v20160314'
 
 	//JDBC driver (and implicit in-memory database server)
 	runtime 'com.h2database:h2:1.4.191'
