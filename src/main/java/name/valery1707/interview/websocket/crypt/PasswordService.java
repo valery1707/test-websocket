@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 
 @Component
@@ -20,7 +21,7 @@ public class PasswordService {
 	@Value("${password.hash.iterations}")
 	private int hashIterations;
 
-	public String createPasswordHash(String userPassword) {
+	public String createPasswordHash(@Nonnull String userPassword) {
 		try {
 			return PasswordStorage.createHash(userPassword.toCharArray(), saltSize, hashSize, hashIterations);
 		} catch (PasswordStorage.CannotPerformOperationException e) {
