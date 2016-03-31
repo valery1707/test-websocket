@@ -137,7 +137,16 @@ public class WebSocketPureTest {
 
 	@Test(timeout = 10_000)
 	public void testAuth_unknown() throws Exception {
-		WebProtocol request = makeAuth("unknown", "bad");
+		auth_incorrect("unknown", "bad");
+	}
+
+	@Test(timeout = 10_000)
+	public void testAuth_badPass() throws Exception {
+		auth_incorrect("fpi@bk.ru", "321321");
+	}
+
+	private WebProtocol auth_incorrect(String email, String password) throws IOException, InterruptedException {
+		WebProtocol request = makeAuth(email, password);
 		WebProtocol response = send(request);
 		assertThat(response)
 				.isNotNull();
@@ -151,6 +160,7 @@ public class WebSocketPureTest {
 				.containsOnlyKeys("error_code", "error_description")
 				.containsEntry("error_code", "customer.notFound")
 				.containsEntry("error_description", "Customer not found");
+		return response;
 	}
 
 	@Test(timeout = 10_000)
