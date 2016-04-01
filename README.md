@@ -12,6 +12,20 @@ Simple project for work with Websocket: `spring-boot`, `jetty-embedded`
 	* Alternatives: Tomcat embedded, Jetty
 	* Selected: Jetty
 	* Reason: Jetty has less footprint (~ 1.4 MiB, ~ 1.7 MiB with websocket implementation) than Tomcat (~ 2.7 MiB, 2.9 MiB with websocket implementation)
+1. WebSocket connection mode: in test client (JavaScript) and server simultaneously implemented two modes (pure websocket connection, and Sock.JS+STOMP)
+	1. Pure websocket: 
+		* Advantages:
+			* direct use WebSocket object in JavaScript
+			* no additional overhead
+		* Disadvantages:
+			* sometime could not work (e.g. [CloudFlare](https://support.cloudflare.com/hc/en-us/articles/200169466))
+	1. Sock.JS+STOMP
+		* Advantages:
+			* work even browser does not support WebSocket or connection to WebSocket server is blocked
+			* supported by Spring
+		* Disadvantages:
+			* add overhead with STOMP protocol
+			* require additional library for interact with server
 
 ### Useful gradle commands
 1. Run project from console: `./gradlew bootRun`
