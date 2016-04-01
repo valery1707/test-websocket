@@ -17,3 +17,6 @@ Simple project for work with Websocket: `spring-boot`, `jetty-embedded`
 1. Run project from console: `./gradlew bootRun`
 1. Build executable jar: `./gradlew build`
 1. Build test coverage report: `./gradlew check jacocoTestReport` and open `build/reports/jacoco/test/html/index.html`
+1. Run project in WildFly 9.0.2: `./gradlew build cargoRunLocal`
+  * Sometimes WildFly could not access to temp file on VFS and fail deploy, in this case you need to stop WildFly and run command second time
+  * Sometimes `cargo` could not stop launched application server, in this case you can try stop server by command `./gradlew cargoStopLocal` or kill `java` manual

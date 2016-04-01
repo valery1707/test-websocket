@@ -79,14 +79,15 @@ dependencies {
 	runtime 'com.h2database:h2:1.4.191'
 	//JDBC Connection pooling
 	runtime 'org.apache.tomcat:tomcat-jdbc:8.0.33'
+//	providedRuntime 'org.apache.tomcat:tomcat-juli:8.0.33'//If run in Jetty 9 over cargo we need move this jar to provided scope
 
 	//Database migration tool
 	compile 'org.flywaydb:flyway-core:4.0'
 
 	//Validation
 	compile 'javax.validation:validation-api:1.1.0.Final'
-	compile 'org.hibernate:hibernate-validator:5.2.4.Final'
-	compile 'javax.el:javax.el-api:3.0.0'
+	runtime 'org.hibernate:hibernate-validator:5.2.4.Final'
+	providedRuntime 'javax.el:javax.el-api:3.0.0'
 
 	//Runtime weaver
 	compile 'org.aspectj:aspectjweaver:1.8.9'
@@ -129,6 +130,58 @@ jacocoTestReport {
 		html.enabled = true
 	}
 }
+
+//Cargo
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.bmuschko:gradle-cargo-plugin:2.2.2'
+	}
+}
+apply plugin: 'com.bmuschko.cargo'
+def cargoHome = "$buildDir/cargo/app"
+cargo {
+//	containerId = 'tomcat7x'
+//	containerId = 'jetty9x'
+	containerId = 'wildfly9x'
+//	containerId = 'wildfly10x'
+	port = 8080
+	deployable {
+		context = 'ROOT'
+	}
+	local {
+		homeDir = file(cargoHome)
+		configHomeDir = file(cargoHome)
+		outputFile = file("$cargoHome/../server.log")
+		installer {
+//			installUrl = 'http://www-us.apache.org/dist/tomcat/tomcat-7/v7.0.68/bin/apache-tomcat-7.0.68.zip'
+//			installUrl = 'http://download.eclipse.org/jetty/9.3.8.v20160314/dist/jetty-distribution-9.3.8.v20160314.zip'
+			installUrl = 'http://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip'
+//			installUrl = 'http://download.jboss.org/wildfly/10.0.0.Final/wildfly-10.0.0.Final.zip'
+			downloadDir = file("$cargoHome/../download")
+			extractDir = file("$cargoHome/../extract")
+		}
+		containerProperties {
+			property 'cargo.jboss.management-http.port', 9999
+		}
+	}
+}
+task cargoCreateHome {
+	outputs.upToDateWhen {
+		file(cargoHome).exists()
+	}
+	doLast {
+		if (!file(cargoHome).exists() && !file(cargoHome).mkdirs()) {
+			println "Failed to create directory '${cargoHome}'"
+		} else {
+			println "Directory '${cargoHome}' created"
+		}
+	}
+}
+cargoStartLocal.dependsOn cargoCreateHome
+cargoRunLocal.dependsOn cargoCreateHome
 
 // Heroku special task
 task stage {
