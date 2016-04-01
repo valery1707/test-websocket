@@ -142,11 +142,16 @@ buildscript {
 }
 apply plugin: 'com.bmuschko.cargo'
 def cargoHome = "$buildDir/cargo/app"
+dependencies {
+	def cargoVersion = '1.4.18'
+	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion"
+	cargo "org.codehaus.cargo:cargo-ant:$cargoVersion"
+}
 cargo {
 //	containerId = 'tomcat7x'
 //	containerId = 'jetty9x'
-	containerId = 'wildfly9x'
-//	containerId = 'wildfly10x'
+//	containerId = 'wildfly9x'
+	containerId = 'wildfly10x'
 	port = 8080
 	deployable {
 		context = 'ROOT'
@@ -158,8 +163,8 @@ cargo {
 		installer {
 //			installUrl = 'http://www-us.apache.org/dist/tomcat/tomcat-7/v7.0.68/bin/apache-tomcat-7.0.68.zip'
 //			installUrl = 'http://download.eclipse.org/jetty/9.3.8.v20160314/dist/jetty-distribution-9.3.8.v20160314.zip'
-			installUrl = 'http://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip'
-//			installUrl = 'http://download.jboss.org/wildfly/10.0.0.Final/wildfly-10.0.0.Final.zip'
+//			installUrl = 'http://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip'
+			installUrl = 'http://download.jboss.org/wildfly/10.0.0.Final/wildfly-10.0.0.Final.zip'
 			downloadDir = file("$cargoHome/../download")
 			extractDir = file("$cargoHome/../extract")
 		}
